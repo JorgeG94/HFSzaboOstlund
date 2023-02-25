@@ -162,53 +162,55 @@ program SCF
 
   call set_up_calculation(basis_set, coordinates, nuclear_rep)
 
-  ! ********************** A tool for debugging ***********************
-  ! write(*,*)"The H basis information is: "
-  ! do i = lbound(basis_set,1), ubound(basis_set,1)
-  !   write(*,*) (basis_set(i, j, 1), j=lbound(basis_set,2), ubound(basis_set,2))
-  ! end do
-  ! write(*,*)" "
-  ! write(*,*)"The He basis information is: "
-  ! do i = lbound(basis_set,1), ubound(basis_set,1)
-  !   write(*,*) (basis_set(i, j, 2), j=lbound(basis_set,2), ubound(basis_set,2))
-  ! end do
-  ! write(*,*)" "
-  ! write(*,*)"The systems's coordinates are:"
-  ! write(*,*)"H coordinates:"
-  ! do i = 1, 3
-  !   write(*,*) coordinates(i,1)
-  ! end do
-  ! write(*,*)"He coordinates"
-  ! do i = 1, 3
-  !   write(*,*) coordinates(i, 2)
-  ! end do
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! write(*,*)"The H basis information is: "
+    ! do i = lbound(basis_set,1), ubound(basis_set,1)
+    !   write(*,*) (basis_set(i, j, 1), j=lbound(basis_set,2), ubound(basis_set,2))
+    ! end do
+    ! write(*,*)" "
+    ! write(*,*)"The He basis information is: "
+    ! do i = lbound(basis_set,1), ubound(basis_set,1)
+    !   write(*,*) (basis_set(i, j, 2), j=lbound(basis_set,2), ubound(basis_set,2))
+    ! end do
+    ! write(*,*)" "
+    ! write(*,*)"The systems's coordinates are:"
+    ! write(*,*)"H coordinates:"
+    ! do i = 1, 3
+    !   write(*,*) coordinates(i,1)
+    ! end do
+    ! write(*,*)"He coordinates"
+    ! do i = 1, 3
+    !   write(*,*) coordinates(i, 2)
+    ! end do
+    ! *******************************************************************
 
   ! -------------- Allocate a bunch of matrices (S, T, V, etc.) -------------
 
-  allocate(s(2,2))
-  allocate(diagonal_s(2,2))
-  allocate(inv_sqrt_diag_s(2,2))
-  allocate(u_diagonalizer(2,2))
-  allocate(final_transformed_s(2,2))
-  allocate(T_matrix(2,2))
-  allocate(V_1_Matrix(2,2))
-  allocate(V_2_Matrix(2,2))
-  allocate(V_tot_Matrix(2,2))
-  allocate(two_e_intgrls(2,2,2,2))
-  allocate(density_matrix(2,2))
-  allocate(G_matrix(2,2))
-  allocate(Hcore_matrix(2,2))
-  allocate(Fock_matrix(2,2))
-  allocate(transformed_Fock_matrix(2,2))
-  allocate(diagonalized_Fock_mat(2,2))
-  allocate(diagonal_trans_Fock_matrix(2,2))
-  allocate(c_prime_mat(2,2))
-  allocate(c_matrix(2,2))
-  allocate(old_density_matrix(2,2))
+    allocate(s(2,2))
+    allocate(diagonal_s(2,2))
+    allocate(inv_sqrt_diag_s(2,2))
+    allocate(u_diagonalizer(2,2))
+    allocate(final_transformed_s(2,2))
+    allocate(T_matrix(2,2))
+    allocate(V_1_Matrix(2,2))
+    allocate(V_2_Matrix(2,2))
+    allocate(V_tot_Matrix(2,2))
+    allocate(two_e_intgrls(2,2,2,2))
+    allocate(density_matrix(2,2))
+    allocate(G_matrix(2,2))
+    allocate(Hcore_matrix(2,2))
+    allocate(Fock_matrix(2,2))
+    allocate(transformed_Fock_matrix(2,2))
+    allocate(diagonalized_Fock_mat(2,2))
+    allocate(diagonal_trans_Fock_matrix(2,2))
+    allocate(c_prime_mat(2,2))
+    allocate(c_matrix(2,2))
+    allocate(old_density_matrix(2,2))
 
-  m = 2 !<--- Useful to allocate intermediates in matrix manipulation
-  !                                                       subroutines
+    m = 2 !<--- Useful to allocate intermediates in matrix manipulation
+    !                                                       subroutines
+
+  ! -------------------- Initialize iteration counter --------------------- 
 
   iteration_counter = 0   !<--- counter to keep track of iterations
 
@@ -216,13 +218,13 @@ program SCF
 
   call calculate_T_matrix(basis_set, coordinates, T_matrix)
 
-  ! ********************** A tool for debugging ***********************
-  ! write(*,*)"The T matrix is"
-  ! do i = lbound(T_matrix, 1), ubound(T_matrix,1)
-  !  write(*,*) (T_matrix(i, j), j=lbound(T_matrix,2), ubound(T_matrix,2))
-  ! end do
-  ! write(*,*)" "
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! write(*,*)"The T matrix is"
+    ! do i = lbound(T_matrix, 1), ubound(T_matrix,1)
+    !  write(*,*) (T_matrix(i, j), j=lbound(T_matrix,2), ubound(T_matrix,2))
+    ! end do
+    ! write(*,*)" "
+    ! *******************************************************************
 
 
   ! --- Call subroutine calculate electron-nuclear integrals, get V matrix --
@@ -230,116 +232,116 @@ program SCF
   call calculate_V_matrices(basis_set, coordinates, V_1_Matrix, V_2_Matrix, &
   V_tot_Matrix)
 
-  ! ********************** A tool for debugging ***********************
-  ! write(*,*) "The V1 Matrix is:"
-  ! write(*,*) " "
-  ! do i = lbound(V_1_Matrix,1), ubound(V_1_Matrix,1)
-  !   write(*,*) (V_1_Matrix(i, j), j=lbound(V_1_Matrix,2), &
-  !   ubound(V_1_Matrix,2))
-  ! end do
-  ! write(*,*) " "
-  ! write(*,*) "The V2 Matrix is:"
-  ! write(*,*) " "
-  ! do i = lbound(V_2_Matrix,1), ubound(V_2_Matrix,1)
-  !   write(*,*) (V_2_Matrix(i, j), j=lbound(V_2_Matrix,2), &
-  !   ubound(V_2_Matrix,2))
-  ! end do
-  ! write(*,*) " "
-  ! write(*,*) "The Vtotal Matrix is:"
-  ! write(*,*) " "
-  ! do i = lbound(V_tot_Matrix,1), ubound(V_tot_Matrix,1)
-  !   write(*,*) (V_tot_Matrix(i, j), j=lbound(V_tot_Matrix,2), &
-  !   ubound(V_tot_Matrix,2))
-  ! end do
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! write(*,*) "The V1 Matrix is:"
+    ! write(*,*) " "
+    ! do i = lbound(V_1_Matrix,1), ubound(V_1_Matrix,1)
+    !   write(*,*) (V_1_Matrix(i, j), j=lbound(V_1_Matrix,2), &
+    !   ubound(V_1_Matrix,2))
+    ! end do
+    ! write(*,*) " "
+    ! write(*,*) "The V2 Matrix is:"
+    ! write(*,*) " "
+    ! do i = lbound(V_2_Matrix,1), ubound(V_2_Matrix,1)
+    !   write(*,*) (V_2_Matrix(i, j), j=lbound(V_2_Matrix,2), &
+    !   ubound(V_2_Matrix,2))
+    ! end do
+    ! write(*,*) " "
+    ! write(*,*) "The Vtotal Matrix is:"
+    ! write(*,*) " "
+    ! do i = lbound(V_tot_Matrix,1), ubound(V_tot_Matrix,1)
+    !   write(*,*) (V_tot_Matrix(i, j), j=lbound(V_tot_Matrix,2), &
+    !   ubound(V_tot_Matrix,2))
+    ! end do
+    ! *******************************************************************
 
 
   ! --------------- Call subroutine to generate H_core matrix ---------------
 
   call generate_Hcore_matrix(T_matrix, V_tot_Matrix, Hcore_matrix)
 
-  ! ********************** A tool for debugging ***********************
-  ! write(*,*) "The H_core Matrix is:"
-  ! write(*,*) " "
-  ! do i = lbound(Hcore_matrix,1), ubound(Hcore_matrix,1)
-  !   write(*,*) (Hcore_matrix(i, j), j=lbound(Hcore_matrix,2), &
-  !   ubound(Hcore_matrix,2))
-  ! end do
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! write(*,*) "The H_core Matrix is:"
+    ! write(*,*) " "
+    ! do i = lbound(Hcore_matrix,1), ubound(Hcore_matrix,1)
+    !   write(*,*) (Hcore_matrix(i, j), j=lbound(Hcore_matrix,2), &
+    !   ubound(Hcore_matrix,2))
+    ! end do
+    ! *******************************************************************
 
 
   ! -------- Call subroutine to calculate all 2 electron integrals ----------
 
   call calculate_two_elec_ints(basis_set, coordinates, two_e_intgrls)
 
-  ! ********************** A tool for debugging ***********************
-  ! write(*,*)"The following integrals should be te same: "
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(1,2,1,2) ! 1,2,3,4
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(1,2,1,2) ! 3,2,1,4
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(1,2,1,2) ! 1,4,3,2
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(1,2,1,2) ! 3,4,1,2
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(2,1,2,1) ! 2,1,4,3
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(2,1,2,1) ! 4,1,2,3
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(2,1,2,1) ! 2,3,4,1
-  ! write(*,*)" "
-  ! write(*,*) two_e_intgrls(2,1,2,1) ! 4,3,2,1
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! write(*,*)"The following integrals should be te same: "
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(1,2,1,2) ! 1,2,3,4
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(1,2,1,2) ! 3,2,1,4
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(1,2,1,2) ! 1,4,3,2
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(1,2,1,2) ! 3,4,1,2
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(2,1,2,1) ! 2,1,4,3
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(2,1,2,1) ! 4,1,2,3
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(2,1,2,1) ! 2,3,4,1
+    ! write(*,*)" "
+    ! write(*,*) two_e_intgrls(2,1,2,1) ! 4,3,2,1
+    ! *******************************************************************
 
 
   ! ------------- Call subroutine to calculate overlap matrix ---------------
 
   call calculate_overlap_matrix(basis_set, coordinates, s)
 
-  ! ********************** A tool for debugging ***********************
-  ! write(*,*)"The overlap matrix is"
-  ! do i = lbound(s, 1), ubound(s,1)
-  !  write(*,*) (s(i, j), j=lbound(s,2), ubound(s,2))
-  ! end do
-  ! write(*,*)" "
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! write(*,*)"The overlap matrix is"
+    ! do i = lbound(s, 1), ubound(s,1)
+    !  write(*,*) (s(i, j), j=lbound(s,2), ubound(s,2))
+    ! end do
+    ! write(*,*)" "
+    ! *******************************************************************
 
 
   ! ------------------ Call subroutine for diagonalization ------------------
 
   call jacobi_diagonalization(s, m, diagonal_s, u_diagonalizer)
 
-  ! ********************** A tool for debugging ***********************
-  ! WRITE(*,*)"The diagonalization gives:"
-  ! do i = lbound(diagonal_s,1), ubound(diagonal_s,1)
-  !  WRITE(*,*) (diagonal_s(i,y), y = lbound(diagonal_s,1), ubound(diagonal_s,1))
-  ! end do
-  ! WRITE(*,*)" "
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! WRITE(*,*)"The diagonalization gives:"
+    ! do i = lbound(diagonal_s,1), ubound(diagonal_s,1)
+    !  WRITE(*,*) (diagonal_s(i,y), y = lbound(diagonal_s,1), ubound(diagonal_s,1))
+    ! end do
+    ! WRITE(*,*)" "
+    ! *******************************************************************
 
-  ! ********************** A tool for debugging ***********************
-  ! WRITE(*,*)"Final eigenvector matrix" ! Print out final Jtot matrix
-  ! do i = lbound(u_diagonalizer,1), ubound(u_diagonalizer,1)
-  !  WRITE(*,*) (u_diagonalizer(i,y), y = lbound(u_diagonalizer,1), &
-  !  &ubound(u_diagonalizer,1))
-  ! end do
-  ! WRITE(*,*)" "
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! WRITE(*,*)"Final eigenvector matrix" ! Print out final Jtot matrix
+    ! do i = lbound(u_diagonalizer,1), ubound(u_diagonalizer,1)
+    !  WRITE(*,*) (u_diagonalizer(i,y), y = lbound(u_diagonalizer,1), &
+    !  &ubound(u_diagonalizer,1))
+    ! end do
+    ! WRITE(*,*)" "
+    ! *******************************************************************
 
 
   ! --- Call subroutine to take inverse square roots of diagonal elements ---
 
   call inverse_sqrt(diagonal_s, m, inv_sqrt_diag_s)
 
-  ! ********************** A tool for debugging ***********************
-  ! WRITE(*,*)"Inverse square root values:"
-  ! do i = lbound(inv_sqrt_diag_s,1), ubound(inv_sqrt_diag_s,1)
-  !  WRITE(*,*) (inv_sqrt_diag_s(i,y), y = lbound(inv_sqrt_diag_s,1), &
-  !  &ubound(diagonal_s,1))
-  ! end do
-  ! WRITE(*,*)" "
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! WRITE(*,*)"Inverse square root values:"
+    ! do i = lbound(inv_sqrt_diag_s,1), ubound(inv_sqrt_diag_s,1)
+    !  WRITE(*,*) (inv_sqrt_diag_s(i,y), y = lbound(inv_sqrt_diag_s,1), &
+    !  &ubound(diagonal_s,1))
+    ! end do
+    ! WRITE(*,*)" "
+    ! *******************************************************************
 
 
   ! ----------- Call subroutine to perform U·s^(-1/2)·U^t -------------------
@@ -347,14 +349,14 @@ program SCF
   call similarity_transformation(inv_sqrt_diag_s, u_diagonalizer, m, &
   final_transformed_s)
 
-  ! ********************** A tool for debugging ***********************
-  ! WRITE(*,*)"Final S to the -1/2:"
-  ! do i = lbound(final_transformed_s,1), ubound(final_transformed_s,1)
-  !   WRITE(*,*) (final_transformed_s(i,y), y = lbound(final_transformed_s,1), &
-  !   &ubound(final_transformed_s,1))
-  ! end do
-  ! WRITE(*,*)" "
-  ! *******************************************************************
+    ! ********************** A tool for debugging ***********************
+    ! WRITE(*,*)"Final S to the -1/2:"
+    ! do i = lbound(final_transformed_s,1), ubound(final_transformed_s,1)
+    !   WRITE(*,*) (final_transformed_s(i,y), y = lbound(final_transformed_s,1), &
+    !   &ubound(final_transformed_s,1))
+    ! end do
+    ! WRITE(*,*)" "
+    ! *******************************************************************
 
 
   ! -- Set initial density matrix to the null matrix (so that F = H_core) ---
@@ -372,29 +374,29 @@ program SCF
 
     call generate_G_matrix(two_e_intgrls, density_matrix, G_matrix)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"The G matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(G_matrix, 1), ubound(G_matrix, 1)
-    !   write(*,*) (G_matrix(i, j), j=lbound(G_matrix,2), &
-    !   ubound(G_matrix,2))
-    ! end do
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"The G matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(G_matrix, 1), ubound(G_matrix, 1)
+      !   write(*,*) (G_matrix(i, j), j=lbound(G_matrix,2), &
+      !   ubound(G_matrix,2))
+      ! end do
+      ! *******************************************************************
 
 
     ! ---------------- Call subroutine to generate Fock matrix ----------------
 
     call generate_Fock_matrix(Hcore_matrix, G_matrix, Fock_matrix)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"The Fock matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(Fock_matrix, 1), ubound(Fock_matrix, 1)
-    !   write(*,*) (Fock_matrix(i, j), j=lbound(Fock_matrix,2), &
-    !   ubound(Fock_matrix,2))
-    ! end do
-    ! write(*,*)" "
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"The Fock matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(Fock_matrix, 1), ubound(Fock_matrix, 1)
+      !   write(*,*) (Fock_matrix(i, j), j=lbound(Fock_matrix,2), &
+      !   ubound(Fock_matrix,2))
+      ! end do
+      ! write(*,*)" "
+      ! *******************************************************************
 
 
     ! ------------ Call subroutine to calculate electronic energy -------------
@@ -402,7 +404,7 @@ program SCF
     call calculate_electronic_energy(density_matrix, Hcore_matrix, &
     Fock_matrix, total_energy)
 
-    write(*,*)"---------- Total energy:", total_energy, "------------------"
+    write(*,*)"---------- Electronic energy:", total_energy, "------------------"
     write(*,*)" "
     write(*,*)" "
     write(*,*)"********* Iteration:", iteration_counter, "*********"
@@ -412,16 +414,16 @@ program SCF
     call similarity_transformation(Fock_matrix, final_transformed_s, m, &
     transformed_Fock_matrix)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"The transformed Fock matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(transformed_Fock_matrix, 1), ubound(transformed_Fock_matrix, 1)
-    !   write(*,*) (transformed_Fock_matrix(i, j), &
-    !   j=lbound(transformed_Fock_matrix,2), &
-    !   ubound(transformed_Fock_matrix,2))
-    ! end do
-    ! write(*,*)" "
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"The transformed Fock matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(transformed_Fock_matrix, 1), ubound(transformed_Fock_matrix, 1)
+      !   write(*,*) (transformed_Fock_matrix(i, j), &
+      !   j=lbound(transformed_Fock_matrix,2), &
+      !   ubound(transformed_Fock_matrix,2))
+      ! end do
+      ! write(*,*)" "
+      ! *******************************************************************
 
 
     ! ------ Call subroutine to diagonalize the transformed Fock matrix -------
@@ -429,87 +431,87 @@ program SCF
     call jacobi_diagonalization(transformed_Fock_matrix, m, &
     diagonal_trans_Fock_matrix, c_prime_mat)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"The diagonalized transformed Fock matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(diagonal_trans_Fock_matrix, 1), &
-    !   ubound(diagonal_trans_Fock_matrix, 1)
-    !   write(*,*) (diagonal_trans_Fock_matrix(i, j), &
-    !   j=lbound(diagonal_trans_Fock_matrix,2), &
-    !   ubound(diagonal_trans_Fock_matrix,2))
-    ! end do
-    ! write(*,*)" "
-    ! write(*,*)"The unordered ordered C' matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(c_prime_mat,1), ubound(c_prime_mat,1)
-    !   write(*,*) (c_prime_mat(i,j), j=lbound(c_prime_mat,2), &
-    !   ubound(c_prime_mat,2))
-    ! end do
-    ! write(*,*)" "
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"The diagonalized transformed Fock matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(diagonal_trans_Fock_matrix, 1), &
+      !   ubound(diagonal_trans_Fock_matrix, 1)
+      !   write(*,*) (diagonal_trans_Fock_matrix(i, j), &
+      !   j=lbound(diagonal_trans_Fock_matrix,2), &
+      !   ubound(diagonal_trans_Fock_matrix,2))
+      ! end do
+      ! write(*,*)" "
+      ! write(*,*)"The unordered ordered C' matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(c_prime_mat,1), ubound(c_prime_mat,1)
+      !   write(*,*) (c_prime_mat(i,j), j=lbound(c_prime_mat,2), &
+      !   ubound(c_prime_mat,2))
+      ! end do
+      ! write(*,*)" "
+      ! *******************************************************************
 
 
     ! - Call subroutine to order eigenvalues/vectors in diagonal Fock Matrix --
 
     call eigenvalue_vector_ordering(diagonal_trans_Fock_matrix, c_prime_mat)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"The ordered transformed Fock matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(diagonal_trans_Fock_matrix, 1), &
-    !   ubound(diagonal_trans_Fock_matrix, 1)
-    !   write(*,*) (diagonal_trans_Fock_matrix(i, j), &
-    !   j=lbound(diagonal_trans_Fock_matrix,2), &
-    !   ubound(diagonal_trans_Fock_matrix,2))
-    ! end do
-    ! write(*,*)" "
-    ! write(*,*)"The ordered C' matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(c_prime_mat,1), ubound(c_prime_mat,1)
-    !   write(*,*) (c_prime_mat(i,j), j=lbound(c_prime_mat,2), &
-    !   ubound(c_prime_mat,2))
-    ! end do
-    ! write(*,*)" "
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"The ordered transformed Fock matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(diagonal_trans_Fock_matrix, 1), &
+      !   ubound(diagonal_trans_Fock_matrix, 1)
+      !   write(*,*) (diagonal_trans_Fock_matrix(i, j), &
+      !   j=lbound(diagonal_trans_Fock_matrix,2), &
+      !   ubound(diagonal_trans_Fock_matrix,2))
+      ! end do
+      ! write(*,*)" "
+      ! write(*,*)"The ordered C' matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(c_prime_mat,1), ubound(c_prime_mat,1)
+      !   write(*,*) (c_prime_mat(i,j), j=lbound(c_prime_mat,2), &
+      !   ubound(c_prime_mat,2))
+      ! end do
+      ! write(*,*)" "
+      ! *******************************************************************
 
 
     ! -------------- Call subroutine to obtain C from S^-1/2*C'----------------
 
     call matrix_multiplication(final_transformed_s, c_prime_mat, c_matrix)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"The C matrix is: "
-    ! write(*,*)" "
-    ! do i = lbound(c_matrix,1), ubound(c_matrix,1)
-    !   write(*,*) (c_matrix(i,j), j=lbound(c_matrix,2), &
-    !   ubound(c_matrix,2))
-    ! end do
-    ! write(*,*)" "
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"The C matrix is: "
+      ! write(*,*)" "
+      ! do i = lbound(c_matrix,1), ubound(c_matrix,1)
+      !   write(*,*) (c_matrix(i,j), j=lbound(c_matrix,2), &
+      !   ubound(c_matrix,2))
+      ! end do
+      ! write(*,*)" "
+      ! *******************************************************************
 
 
     ! -------- Call subroutine to obtain new density matrix from C ------------
 
     call generate_new_density_mat(c_matrix, density_matrix)
 
-    ! ********************** A tool for debugging ***********************
-    write(*,*)"The new density matrix is: "
-    write(*,*)" "
-    do i = lbound(density_matrix,1), ubound(density_matrix,1)
-      write(*,*) (density_matrix(i,j), j=lbound(density_matrix,2), &
-      ubound(density_matrix,2))
-    end do
-    write(*,*)" "
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      write(*,*)"The new density matrix is: "
+      write(*,*)" "
+      do i = lbound(density_matrix,1), ubound(density_matrix,1)
+        write(*,*) (density_matrix(i,j), j=lbound(density_matrix,2), &
+        ubound(density_matrix,2))
+      end do
+      write(*,*)" "
+      ! *******************************************************************
 
     ! -------------- Call subroutine to evaluate convergence ------------------
 
     call determine_convergence(old_density_matrix, density_matrix, is_converged)
 
-    ! ********************** A tool for debugging ***********************
-    ! write(*,*)"Is converged: "
-    ! write(*,*) is_converged
-    ! *******************************************************************
+      ! ********************** A tool for debugging ***********************
+      ! write(*,*)"Is converged: "
+      ! write(*,*) is_converged
+      ! *******************************************************************
 
     iteration_counter = iteration_counter + 1
 
@@ -919,7 +921,7 @@ subroutine set_up_calculation(full_basis, system_coord, nuclear_repulsion)
   ! ------------------------ BSE STO-3G basis set ---------------------------
   ! basis_H = reshape((/0.3425250914E+01, 0.1543289673E+00, 0.6239137298E+00, &
   ! 0.5353281423E+00, 0.1688554040E+00, 0.4446345422E+00/), (/3,2/), ORDER=(/2,1/))
-  !
+  
   ! basis_He = reshape((/0.6362421394E+01, 0.1543289673E+00, 0.1158922999E+01, &
   ! 0.5353281423E+00, 0.3136497915E+00, 0.4446345422E+00/), (/3,2/), ORDER=(/2,1/))
 
@@ -1144,8 +1146,8 @@ subroutine calculate_T_matrix(basis_info, coord_array, kin_engy_mat)
   !
   ! The idea is the following: have do loops whose counters will correspond
   ! to shells in the system. This is will allow to fill the kinetic energy
-  ! matrix with those indices. Example; i=1 and j=2; in this case, the element
-  ! to be calculated will be S_12. Inside this structure, there will be do
+  ! matrix with those indices. Example: i=1 and j=2; in this case, the element
+  ! to be calculated will be T_12. Inside this structure, there will be do
   ! loops that will carry out the integration of the primitives and add the
   ! results to the corresponding kinetic energy matrix element.
 
@@ -1178,7 +1180,7 @@ subroutine calculate_T_matrix(basis_info, coord_array, kin_engy_mat)
 
 
 
-          ! Keep this code readable, and calculate the integral somwhere else
+          ! Keep this code readable, and calculate the integral somewhere else
           call kinetic_integral(exponentA, exponentB, coefA, coefB, &
           function_distance, integral)
 
@@ -1319,9 +1321,6 @@ Vtot_matrix)
 
 
   ! ------------------- Generate V1 (Hydrogen) matrix -----------------------
-
-
-
 
   do i = 1, 2
     do j = 1, 2
@@ -1652,10 +1651,10 @@ subroutine calculate_two_elec_ints(basis_info, coord_array, two_e_ints)
          ! After looping over primitives, put the total integral between the
          !                              four shells in the 4D tensor element
 
-         ! ******************** A tool for debugging ************************
-         ! write(*,*)"4D tensor element: ", i, j, k, l
-         ! write(*,*)total_integral
-         ! ******************************************************************
+          ! ******************** A tool for debugging ************************
+          ! write(*,*)"4D tensor element: ", i, j, k, l
+          ! write(*,*)total_integral
+          ! ******************************************************************
 
          two_e_ints(i, j, k, l) = total_integral
 
